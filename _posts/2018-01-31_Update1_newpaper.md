@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Hank Quinlan, Horrible Cop, Launches Site"
-date: 2014-04-30
+title: "HAWC+ team releases a new paper at the 2018 AAS meeting!"
+date: 2018-01-21
 ---
 
-Well. Finally got around to putting this old website together. Neat thing about it - powered by [Jekyll](http://jekyllrb.com) and I can use Markdown to author my posts. It actually is a lot easier than I thought it was going to be.
+Horay! The HAWC+ team has released our first presentation based on our fourteenth flight series data! This poster was presented in the beginning of January, 2018 at the anual Ameriacn Astronomical Sociaty meeting!
