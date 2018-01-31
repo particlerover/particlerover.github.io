@@ -1,0 +1,28 @@
+
+---
+layout: feed
+---
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+ 
+ <title>Carrie Volpert's Blog</title>
+ <link href="http://particlerover.github.io/blog/jan_paper.xml" rel="self"/>
+ <link href="http://particlerover.github.io/blog"/>
+ <updated>{{ site.time | date_to_xmlschema }}</updated>
+ <id>http://particlerover.github.io/blog</id>
+ <author>
+   <name>Carrie Volpert</name>
+   <email>cvolpert95@gmail.com</email>
+ </author>
+
+ {% for post in site.posts %}
+ <entry>
+   <title>{{A New Paper from the HAWC+ Team!!}}</title>
+   <link href="http://particlerover.github.io{{_posts/2018-01-31_Update1_newpaper.md}}"/>
+   <updated>{{ post.date | date_to_xmlschema }}</updated>
+   <id>http://particlerover.github.io/{{_posts/2018-01-31_Update1_newpaper.md}}</id>
+   <content type="html">{{ post.content | xml_escape }}</content>
+ </entry>
+ {% endfor %}
+ 
+</feed>
