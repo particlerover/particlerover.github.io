@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galactic Disk Simulation - Spinning Arms</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000811;
+            color: white;
+            font-family: 'Courier New', monospace;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .main-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .simulation-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: #000811;
+        }
+        
+        .controls-panel {
+            width: 400px;
+            background: #001122;
+            padding: 20px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        
+        canvas {
+            border: 1px solid #333;
+            background: #000811;
+        }
+        
+        .simulation-title {
+            color: #ffaa66;
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .simulation-subtitle {
+            color: #88ccff;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.4;
+        }
+        
+        .control-buttons {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            background: #cc4400;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button:hover {
+            background: #ff6600;
+        }
+        
+        button:disabled {
+            background: #333;
+            cursor: not-allowed;
+        }
+        
+        .physics-controls {
+            background: #112233;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .controls-title {
+            color: #ffaa66;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .control-group {
+            margin: 12px 0;
+        }
+        
+        .control-group label {
+            display: block;
+            color: #aaccff;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .control-group input[type="range"] {
+            flex: 1;
+            margin-right: 10px;
+        }
+        
+        .control-group span {
+            color: #ffaa66;
+            font-size: 12px;
+            min-width: 50px;
+            text-align: right;
+        }
+        
+        .nav-links {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #333;
+            text-align: center;
+        }
+        
+        .nav-links a {
+            color: #66aaff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        
+        .nav-links a:hover {
+            color: #99ccff;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="simulation-panel">
+            <div class="simulation-title">Galactic particle soup for the soul</div>
+            <div class="simulation-subtitle">
+                Particles emit randomly from the galactic arm surfaces, ejected outward from the disk plane with trajectories influenced by the centripetal forces of the spinning galaxy. Watch as gravitational interactions create complex orbital patterns and streaming formations.
+            </div>
+            <canvas id="canvas" width="900" height="650"></canvas>
+        </div>
+        
+        <div class="controls-panel">
+            <div class="control-buttons">
+                <button id="startBtn">Start Galaxy</button>
+                <button id="pauseBtn" disabled>Pause</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+            
+            <div class="physics-controls">
+                <div class="controls-title">Galaxy Physics Controls</div>
+                
+                <div class="control-group">
+                    <label>Initial Velocity:</label>
+                    <div class="control-row">
+                        <input type="range" id="velocitySlider" min="2" max="12" step="0.5" value="6">
+                        <span id="velocityValue">6.0</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Centripetal Force:</label>
+                    <div class="control-row">
+                        <input type="range" id="centripetalSlider" min="0" max="10" step="0.5" value="6">
+                        <span id="centripetalValue">6.0</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Disk Gravity:</label>
+                    <div class="control-row">
+                        <input type="range" id="diskGravitySlider" min="0" max="30" step="1" value="18">
+                        <span id="diskGravityValue">18</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Ball-to-Ball Gravity:</label>
+                    <div class="control-row">
+                        <input type="range" id="ballGravitySlider" min="0" max="12" step="0.5" value="7">
+                        <span id="ballGravityValue">7.0</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Viewing Angle Tilt:</label>
+                    <div class="control-row">
+                        <input type="range" id="viewTiltSlider" min="-30" max="30" step="2" value="0">
+                        <span id="viewTiltValue">0°</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Number of Arms:</label>
+                    <div class="control-row">
+                        <input type="range" id="armsSlider" min="2" max="8" step="1" value="5">
+                        <span id="armsValue">5</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Arm Width:</label>
+                    <div class="control-row">
+                        <input type="range" id="armWidthSlider" min="0.5" max="3.0" step="0.1" value="1.0">
+                        <span id="armWidthValue">1.0</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Emission Points per Arm:</label>
+                    <div class="control-row">
+                        <input type="range" id="emissionPointsSlider" min="10" max="50" step="5" value="30">
+                        <span id="emissionPointsValue">30</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Initial Emission Rate:</label>
+                    <div class="control-row">
+                        <input type="range" id="emissionRateSlider" min="0.01" max="0.1" step="0.005" value="0.045">
+                        <span id="emissionRateValue">0.045</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Emission Decay Rate:</label>
+                    <div class="control-row">
+                        <input type="range" id="decayRateSlider" min="600" max="3600" step="300" value="1200">
+                        <span id="decayRateValue">1200</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Max Particles:</label>
+                    <div class="control-row">
+                        <input type="range" id="maxParticlesSlider" min="500" max="5000" step="250" value="2000">
+                        <span id="maxParticlesValue">2000</span>
+                    </div>
+                </div>
+                <div style="color: #ff6666; font-size: 11px; margin-top: 10px; text-align: center;">
+                    ⚠️ High particle counts are computationally expensive
+                </div>
+            </div>
+            
+            <div class="nav-links">
+                <a href="helix.html">← Back to Helix Simulation</a>
+                <a href="index.html">Galaxy Soup Home</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="galaxy.js"></script>
+</body>
+</html>

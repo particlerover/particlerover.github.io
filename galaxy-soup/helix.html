@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Simulation - Streamer Disk</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        
+        #container {
+            text-align: center;
+        }
+        
+        canvas {
+            border: 1px solid #333;
+            background: #001122;
+        }
+        
+        .controls {
+            margin-top: 10px;
+            color: white;
+        }
+        
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #0088ff;
+        }
+        
+        button:disabled {
+            background: #333;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <canvas id="canvas" width="800" height="600"></canvas>
+        <div class="controls">
+            <button id="startBtn">Start Simulation</button>
+            <button id="pauseBtn" disabled>Pause</button>
+            <button id="resetBtn">Reset</button>
+            <div style="margin-top: 10px;">
+                <span style="color: #ccc;">Click Start to begin the streamer emission!</span>
+            </div>
+            <div style="margin-top: 5px; font-size: 12px; color: #888;">
+                Watch as balls emit in spirals and attract each other when close!
+            </div>
+        </div>
+                <div class="nav-links">
+            <a href="galaxy.html" style="color: #66aaff; text-decoration: none;">→ Try the Galactic Disk Simulation</a>
+            <a href="index.html" style="color: #66aaff; text-decoration: none;">Galaxy Soup Home</a>
+        </div>
+    </div>
+    
+    <script src="simulation.js"></script>
+</body>
+</html>
