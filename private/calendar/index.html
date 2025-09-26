@@ -28,12 +28,11 @@ title: Private Booking Calendar - Friends & Family
             <span>Available</span>
         </div>
         <div class="legend-item">
-            <div class="legend-color booked"></div>
-            <span>Booked</span>
-        </div>
-        <div class="legend-item">
             <div class="legend-color selecting"></div>
             <span>Selecting</span>
+        </div>
+        <div id="dynamicLegend">
+            <!-- Dynamic booking colors will be added here -->
         </div>
     </div>
 
@@ -72,6 +71,23 @@ title: Private Booking Calendar - Friends & Family
             <div class="form-group">
                 <label for="endDate">End Date:</label>
                 <input type="date" id="endDate" name="endDate" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="bookingColor">Choose a color for your visit:</label>
+                <div class="color-picker-container">
+                    <input type="color" id="bookingColor" name="bookingColor" value="#e74c3c">
+                    <div class="preset-colors">
+                        <div class="preset-color" data-color="#e74c3c" style="background: #e74c3c;" title="Red"></div>
+                        <div class="preset-color" data-color="#3498db" style="background: #3498db;" title="Blue"></div>
+                        <div class="preset-color" data-color="#2ecc71" style="background: #2ecc71;" title="Green"></div>
+                        <div class="preset-color" data-color="#f39c12" style="background: #f39c12;" title="Orange"></div>
+                        <div class="preset-color" data-color="#9b59b6" style="background: #9b59b6;" title="Purple"></div>
+                        <div class="preset-color" data-color="#1abc9c" style="background: #1abc9c;" title="Teal"></div>
+                        <div class="preset-color" data-color="#e67e22" style="background: #e67e22;" title="Carrot"></div>
+                        <div class="preset-color" data-color="#34495e" style="background: #34495e;" title="Dark Gray"></div>
+                    </div>
+                </div>
             </div>
             
             <div class="form-group">
@@ -190,10 +206,7 @@ title: Private Booking Calendar - Friends & Family
     font-weight: bold;
 }
 
-.calendar-day.booked {
-    background: #ffebee;
-    border-left: 4px solid #e74c3c;
-}
+
 
 .calendar-day.selecting {
     background: #e3f2fd;
@@ -247,10 +260,7 @@ title: Private Booking Calendar - Friends & Family
     background: white;
 }
 
-.legend-color.booked {
-    background: #ffebee;
-    border-left: 4px solid #e74c3c;
-}
+
 
 .legend-color.selecting {
     background: #e3f2fd;
@@ -358,6 +368,112 @@ title: Private Booking Calendar - Friends & Family
     outline: none;
     border-color: #007cba;
     box-shadow: 0 0 5px rgba(0,124,186,0.3);
+}
+
+/* Color Picker Styles */
+.color-picker-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.color-picker-container input[type="color"] {
+    width: 50px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.preset-colors {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.preset-color {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.preset-color:hover {
+    transform: scale(1.1);
+    border-color: #333;
+}
+
+.preset-color.selected {
+    border-color: #333;
+    transform: scale(1.1);
+}
+
+/* Split Day Styles */
+.calendar-day.has-multiple-bookings {
+    padding: 0;
+    overflow: hidden;
+}
+
+.calendar-day-sections {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 80px;
+}
+
+.calendar-day-section {
+    flex: 1;
+    padding: 4px 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+
+.calendar-day-section:last-child {
+    border-bottom: none;
+}
+
+.calendar-day-section .day-number {
+    font-size: 10px;
+    font-weight: bold;
+    margin-bottom: 2px;
+    color: rgba(0,0,0,0.7);
+}
+
+.calendar-day-section .booking-info {
+    font-size: 10px;
+    color: rgba(0,0,0,0.8);
+    margin: 0;
+    text-align: center;
+    font-weight: 500;
+    text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
+}
+
+/* Single booking day with color */
+.calendar-day.single-booking {
+    border-left: 4px solid var(--booking-color);
+}
+
+/* Dynamic legend colors */
+.legend-booking {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 15px;
+    margin-bottom: 8px;
+}
+
+.legend-booking .legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    margin-right: 8px;
+    border: 1px solid rgba(0,0,0,0.2);
 }
 
 .form-buttons {

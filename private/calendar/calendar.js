@@ -17,6 +17,7 @@ class BookingCalendar {
         this.setupEventListeners();
         this.renderCalendar();
         this.renderBookingsList();
+        this.updateLegend();
     }
 
     initEmailJS() {
@@ -86,6 +87,13 @@ class BookingCalendar {
                 }
             }
         });
+
+        // Color picker functionality
+        this.setupColorPicker();
+    }
+
+    setupColorPicker() {
+        // Will be set up when modal opens to avoid DOM issues
     }
 
     renderCalendar() {
@@ -144,40 +152,82 @@ class BookingCalendar {
 
         // Check if this date has bookings
         const bookingsForDate = this.getBookingsForDate(date);
-        if (bookingsForDate.length > 0) {
-            dayDiv.classList.add('booked');
-        }
-
-        // Add day number
-        const dayNumber = document.createElement('div');
-        dayNumber.className = 'day-number';
-        dayNumber.textContent = date.getDate();
-        dayDiv.appendChild(dayNumber);
-
-        // Add booking info
-        bookingsForDate.forEach(booking => {
+        
+        if (bookingsForDate.length === 0) {
+            // No bookings - simple day
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = date.getDate();
+            dayDiv.appendChild(dayNumber);
+        } else if (bookingsForDate.length === 1) {
+            // Single booking - use color border
+            const booking = bookingsForDate[0];
+            const color = booking.color || '#e74c3c';
+            
+            dayDiv.classList.add('single-booking');
+            dayDiv.style.setProperty('--booking-color', color);
+            
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = date.getDate();
+            dayDiv.appendChild(dayNumber);
+            
             const bookingInfo = document.createElement('div');
             bookingInfo.className = 'booking-info';
             bookingInfo.textContent = booking.visitorName;
             bookingInfo.title = `${booking.visitorName}${booking.petInfo ? ' + ' + booking.petInfo : ''}`;
             dayDiv.appendChild(bookingInfo);
-        });
+        } else {
+            // Multiple bookings - split the day
+            dayDiv.classList.add('has-multiple-bookings');
+            
+            const sectionsContainer = document.createElement('div');
+            sectionsContainer.className = 'calendar-day-sections';
+            
+            bookingsForDate.forEach((booking, index) => {
+                const section = document.createElement('div');
+                section.className = 'calendar-day-section';
+                section.style.backgroundColor = booking.color || '#e74c3c';
+                
+                // Only show day number on first section
+                if (index === 0) {
+                    const dayNumber = document.createElement('div');
+                    dayNumber.className = 'day-number';
+                    dayNumber.textContent = date.getDate();
+                    section.appendChild(dayNumber);
+                }
+                
+                const bookingInfo = document.createElement('div');
+                bookingInfo.className = 'booking-info';
+                bookingInfo.textContent = booking.visitorName;
+                bookingInfo.title = `${booking.visitorName}${booking.petInfo ? ' + ' + booking.petInfo : ''}`;
+                section.appendChild(bookingInfo);
+                
+                sectionsContainer.appendChild(section);
+            });
+            
+            dayDiv.appendChild(sectionsContainer);
+        }
 
         // Add click handler for date selection
         dayDiv.addEventListener('click', (e) => {
             e.preventDefault();
-            this.handleDateClick(date, dayDiv);
+            this.handleDateClick(date, dayDiv, bookingsForDate);
         });
 
         return dayDiv;
     }
 
-    handleDateClick(date, dayDiv) {
+    handleDateClick(date, dayDiv, bookingsForDate = null) {
         const dateStr = this.formatDate(date);
         
         // If clicking on a booked date, show booking details
-        const bookingsForDate = this.getBookingsForDate(date);
+        if (!bookingsForDate) {
+            bookingsForDate = this.getBookingsForDate(date);
+        }
+        
         if (bookingsForDate.length > 0) {
+            // If multiple bookings, show a selection modal or edit the first one
             this.editBooking(bookingsForDate[0]); // Edit first booking for that date
             return;
         }
@@ -221,13 +271,51 @@ class BookingCalendar {
         deleteBtn.style.display = 'none';
         document.getElementById('modalTitle').textContent = 'Add New Visit';
         
+        // Set default color
+        document.getElementById('bookingColor').value = '#e74c3c';
+        
         if (selectedDates && selectedDates.length >= 1) {
             document.getElementById('startDate').value = selectedDates[0];
             document.getElementById('endDate').value = selectedDates[1] || selectedDates[0];
         }
         
+        // Setup color picker after modal is shown
+        setTimeout(() => {
+            this.setupColorPickerEvents();
+        }, 100);
+        
         modal.style.display = 'block';
         document.getElementById('visitorName').focus();
+    }
+
+    setupColorPickerEvents() {
+        const colorInput = document.getElementById('bookingColor');
+        const presetColors = document.querySelectorAll('.preset-color');
+        
+        // Remove any existing event listeners
+        presetColors.forEach(preset => {
+            preset.replaceWith(preset.cloneNode(true));
+        });
+        
+        // Add new event listeners
+        document.querySelectorAll('.preset-color').forEach(preset => {
+            preset.addEventListener('click', () => {
+                const color = preset.dataset.color;
+                colorInput.value = color;
+                
+                // Update visual selection
+                document.querySelectorAll('.preset-color').forEach(p => p.classList.remove('selected'));
+                preset.classList.add('selected');
+            });
+        });
+        
+        // Update preset selection when color input changes
+        colorInput.addEventListener('input', () => {
+            const selectedColor = colorInput.value;
+            document.querySelectorAll('.preset-color').forEach(preset => {
+                preset.classList.toggle('selected', preset.dataset.color === selectedColor);
+            });
+        });
     }
 
     closeBookingModal() {
@@ -248,6 +336,12 @@ class BookingCalendar {
         document.getElementById('startDate').value = booking.startDate;
         document.getElementById('endDate').value = booking.endDate;
         document.getElementById('notes').value = booking.notes || '';
+        document.getElementById('bookingColor').value = booking.color || '#e74c3c';
+        
+        // Setup color picker after modal is shown
+        setTimeout(() => {
+            this.setupColorPickerEvents();
+        }, 100);
         
         deleteBtn.style.display = 'inline-block';
         modal.style.display = 'block';
@@ -261,6 +355,7 @@ class BookingCalendar {
             petInfo: formData.get('petInfo'),
             startDate: formData.get('startDate'),
             endDate: formData.get('endDate'),
+            color: formData.get('bookingColor'),
             notes: formData.get('notes'),
             createdAt: this.editingBooking ? this.editingBooking.createdAt : new Date().toISOString()
         };
@@ -294,6 +389,7 @@ class BookingCalendar {
         this.saveBookings();
         this.renderCalendar();
         this.renderBookingsList();
+        this.updateLegend();
         this.closeBookingModal();
     }
 
@@ -304,6 +400,7 @@ class BookingCalendar {
             this.saveBookings();
             this.renderCalendar();
             this.renderBookingsList();
+            this.updateLegend();
             this.closeBookingModal();
         }
     }
@@ -353,6 +450,9 @@ class BookingCalendar {
             const endDate = new Date(booking.endDate).toLocaleDateString();
             const duration = startDate === endDate ? startDate : `${startDate} - ${endDate}`;
             
+            const color = booking.color || '#e74c3c';
+            bookingDiv.style.borderLeft = `4px solid ${color}`;
+            
             bookingDiv.innerHTML = `
                 <div class="booking-visitor">${booking.visitorName}</div>
                 <div class="booking-dates">${duration}</div>
@@ -365,6 +465,42 @@ class BookingCalendar {
             });
             
             listContainer.appendChild(bookingDiv);
+        });
+    }
+
+    updateLegend() {
+        const dynamicLegend = document.getElementById('dynamicLegend');
+        if (!dynamicLegend) return;
+        
+        dynamicLegend.innerHTML = '';
+
+        // Get unique booking colors and visitors
+        const uniqueBookings = new Map();
+        this.bookings.forEach(booking => {
+            const key = `${booking.visitorName}_${booking.color || '#e74c3c'}`;
+            if (!uniqueBookings.has(key)) {
+                uniqueBookings.set(key, {
+                    visitorName: booking.visitorName,
+                    color: booking.color || '#e74c3c'
+                });
+            }
+        });
+
+        // Create legend items for each unique booking
+        uniqueBookings.forEach(booking => {
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-booking';
+            
+            const colorDiv = document.createElement('div');
+            colorDiv.className = 'legend-color';
+            colorDiv.style.backgroundColor = booking.color;
+            
+            const label = document.createElement('span');
+            label.textContent = booking.visitorName;
+            
+            legendItem.appendChild(colorDiv);
+            legendItem.appendChild(label);
+            dynamicLegend.appendChild(legendItem);
         });
     }
 
