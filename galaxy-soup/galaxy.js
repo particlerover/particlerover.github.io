@@ -272,14 +272,14 @@ class GalacticDisk {
         }
     }
     
-    // Emit balls from random active points along arms
-    emitBalls(baseVelocity, centripetalForce, emissionRate, decayRate) {
+    // Emit balls from random active points in bulge
+    emitBalls(baseVelocity, centripetalForce, emissionRate, decayRate, simulationFrameCount = 0) {
         if (!this.isActive) return [];
         
         const newBalls = [];
         
         for (let point of this.emissionPoints) {
-            if (!point.isActive) continue;
+            if (!point.isActive || !point.bulgePoint) continue; // Only emit from bulge points
             
             // Dynamic emission timing
             const fullEmissionTime = 2400; // Full emission for 2 minutes at 20fps (120 seconds)
@@ -287,16 +287,16 @@ class GalacticDisk {
             const simulationEndTime = decayEndTime + 100; // Continue 5 more seconds after emission stops (at 20fps)
             let timeFactor;
             
-            if (this.frameCount < fullEmissionTime) {
+            if (simulationFrameCount < fullEmissionTime) {
                 // Full emission rate for first portion
                 timeFactor = 1.0;
-            } else if (this.frameCount < decayEndTime) {
+            } else if (simulationFrameCount < decayEndTime) {
                 // Logarithmic decay period
-                const decayTime = this.frameCount - fullEmissionTime;
+                const decayTime = simulationFrameCount - fullEmissionTime;
                 const maxDecayTime = decayEndTime - fullEmissionTime;
                 const decayProgress = decayTime / maxDecayTime; // 0 to 1
                 timeFactor = Math.max(0.05, Math.log(1 + (1 - decayProgress) * (Math.E - 1)) / Math.E); // Logarithmic from 1.0 to 0.05
-            } else if (this.frameCount < simulationEndTime) {
+            } else if (simulationFrameCount < simulationEndTime) {
                 // No emission for final 5 seconds, just physics
                 timeFactor = 0.0;
             } else {
@@ -550,6 +550,8 @@ class GalaxySimulation {
         const emissionRateSlider = document.getElementById('emissionRateSlider');
         const decayRateSlider = document.getElementById('decayRateSlider');
         const maxParticlesSlider = document.getElementById('maxParticlesSlider');
+        const bulgeRadiusSlider = document.getElementById('bulgeRadiusSlider');
+        const bulgeHeightSlider = document.getElementById('bulgeHeightSlider');
         
         velocitySlider.addEventListener('input', (e) => {
             this.baseVelocity = parseFloat(e.target.value);
@@ -613,9 +615,6 @@ class GalaxySimulation {
         });
         
         // Bulge control sliders
-        const bulgeRadiusSlider = document.getElementById('bulgeRadiusSlider');
-        const bulgeHeightSlider = document.getElementById('bulgeHeightSlider');
-        
         bulgeRadiusSlider.addEventListener('input', (e) => {
             this.bulgeRadius = parseInt(e.target.value);
             document.getElementById('bulgeRadiusValue').textContent = this.bulgeRadius.toString();
@@ -676,8 +675,8 @@ class GalaxySimulation {
         // Update galaxy
         this.galaxy.update();
         
-        // Emit new balls from galaxy arms
-        const newBalls = this.galaxy.emitBalls(this.baseVelocity, this.centripetalForce, this.initialEmissionRate, this.emissionDecayRate);
+        // Emit new balls from galaxy bulge
+        const newBalls = this.galaxy.emitBalls(this.baseVelocity, this.centripetalForce, this.initialEmissionRate, this.emissionDecayRate, this.frameCount);
         this.balls.push(...newBalls);
         
         // Limit ball count
