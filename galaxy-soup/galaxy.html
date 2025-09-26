@@ -3,254 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galactic Disk Simulation - Star Formation</title>
+    <title>Galactic Disk Simulation - Star Formation Physics</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background: #000811;
-            color: white;
-            font-family: 'Courier New', monospace;
+            background: #0a0a1a;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
             height: 100vh;
             overflow: hidden;
         }
         
-        .main-container {
-            display: flex;
-            height: 100vh;
-        }
-        
-        .simulation-panel {
+        .simulation-container {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            background: #000811;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 100%);
+        }
+        
+        #galaxyCanvas {
+            border: 2px solid #444;
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(100, 149, 237, 0.3);
+            background: #000011;
         }
         
         .controls-panel {
-            width: 400px;
-            background: #001122;
+            width: 320px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            border-left: 2px solid #444;
             padding: 20px;
             overflow-y: auto;
-            box-sizing: border-box;
+            box-shadow: inset 5px 0 15px rgba(0, 0, 0, 0.3);
         }
         
-        canvas {
-            border: 1px solid #333;
-            background: #000811;
-        }
-        
-        .simulation-title {
-            color: #ffaa66;
-            font-size: 24px;
-            margin-bottom: 10px;
+        .controls-panel h2 {
             text-align: center;
-        }
-        
-        .simulation-subtitle {
-            color: #88ccff;
-            font-size: 14px;
-            margin-bottom: 20px;
-            text-align: center;
-            max-width: 600px;
-            line-height: 1.4;
-        }
-        
-        .control-buttons {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        button {
-            margin: 5px;
-            padding: 8px 16px;
-            background: #cc4400;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-        }
-        
-        button:hover {
-            background: #ff6600;
-        }
-        
-        button:disabled {
-            background: #333;
-            cursor: not-allowed;
-        }
-        
-        .physics-controls {
-            background: #112233;
-            border-radius: 8px;
-            padding: 15px;
-        }
-        
-        .controls-title {
-            color: #ffaa66;
-            font-size: 16px;
-            margin-bottom: 15px;
-            font-weight: bold;
-            text-align: center;
+            margin-bottom: 25px;
+            color: #6495ed;
+            text-shadow: 0 0 10px rgba(100, 149, 237, 0.5);
+            font-size: 1.4em;
         }
         
         .control-group {
-            margin: 12px 0;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(100, 149, 237, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(100, 149, 237, 0.2);
         }
         
         .control-group label {
             display: block;
-            color: #aaccff;
-            font-size: 12px;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #87ceeb;
         }
         
         .control-row {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 10px;
         }
         
-        .control-group input[type="range"] {
+        input[type="range"] {
             flex: 1;
-            margin-right: 10px;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
         }
         
-        .control-group span {
-            color: #ffaa66;
-            font-size: 12px;
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #6495ed;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(100, 149, 237, 0.6);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #6495ed;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 8px rgba(100, 149, 237, 0.6);
+        }
+        
+        span {
             min-width: 50px;
             text-align: right;
+            font-family: 'Courier New', monospace;
+            color: #b0c4de;
+            font-size: 0.9em;
         }
         
-        .nav-links {
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(145deg, #6495ed, #4169e1);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(100, 149, 237, 0.3);
+        }
+        
+        button:hover {
+            background: linear-gradient(145deg, #4169e1, #6495ed);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(100, 149, 237, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .info-panel {
             margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #333;
-            text-align: center;
-        }
-        
-        .nav-links a {
-            color: #66aaff;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-        
-        .nav-links a:hover {
-            color: #99ccff;
+            padding: 15px;
+            background: rgba(100, 149, 237, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(100, 149, 237, 0.3);
+            font-size: 0.85em;
+            line-height: 1.4;
+            color: #b0c4de;
         }
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <div class="simulation-panel">
-            <div class="simulation-title">Galactic particle soup for the soul</div>
-            <div class="simulation-subtitle">
-                Particles emit randomly from the galactic arm surfaces, ejected outward from the disk plane with trajectories influenced by the centripetal forces of the spinning galaxy.
-            </div>
-            <canvas id="canvas" width="900" height="650"></canvas>
+    <div class="simulation-container">
+        <canvas id="galaxyCanvas" width="900" height="650"></canvas>
+    </div>
+    
+    <div class="controls-panel">
+        <h2>Galaxy Physics Controls</h2>
+        
+        <div class="button-row">
+            <button id="startButton">Start Simulation</button>
+            <button id="resetButton">Reset Galaxy</button>
         </div>
         
-        <div class="controls-panel">
-            <div class="control-buttons">
-                <button id="startBtn">Start Galaxy</button>
-                <button id="pauseBtn" disabled>Pause</button>
-                <button id="resetBtn">Reset</button>
+        <div class="control-group">
+            <label>Base Velocity:</label>
+            <div class="control-row">
+                <input type="range" id="velocitySlider" min="1.0" max="15.0" step="0.5" value="8.0">
+                <span id="velocityValue">8.0</span>
             </div>
-            
-            <div class="physics-controls">
-                <div class="controls-title">Galaxy Physics Controls</div>
-                
-                <div class="control-group">
-                    <label>Initial Velocity:</label>
-                    <div class="control-row">
-                        <input type="range" id="velocitySlider" min="2" max="12" step="0.5" value="6">
-                        <span id="velocityValue">6.0</span>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label>Centripetal Force:</label>
-                    <div class="control-row">
-                        <input type="range" id="centripetalSlider" min="0" max="10" step="0.5" value="6">
-                        <span id="centripetalValue">6.0</span>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label>Disk Gravity:</label>
-                    <div class="control-row">
-                        <input type="range" id="diskGravitySlider" min="0.0" max="2.0" step="0.01" value="0.03">
-                        <span id="diskGravityValue">0.03</span>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label>Ball-to-Ball Gravity:</label>
-                    <div class="control-row">
-                        <input type="range" id="ballGravitySlider" min="0.0" max="0.005" step="0.0001" value="0.001">
-                        <span id="ballGravityValue">0.001</span>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label>Viewing Angle Tilt:</label>
-                    <div class="control-row">
-                        <input type="range" id="viewTiltSlider" min="-30" max="30" step="2" value="0">
-                        <span id="viewTiltValue">0°</span>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label>Bulge Radius:</label>
-                    <div class="control-row">
-                        <input type="range" id="bulgeRadiusSlider" min="10" max="120" step="5" value="60">
-                        <span id="bulgeRadiusValue">60</span>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label>Bulge Height:</label>
-                    <div class="control-row">
-                        <input type="range" id="bulgeHeightSlider" min="5" max="40" step="2" value="15">
-                        <span id="bulgeHeightValue">15</span>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label>Number of Star Formation Sites:</label>
-                    <div class="control-row">
-                        <input type="range" id="emissionPointsSlider" min="10" max="50" step="5" value="30">
-                        <span id="emissionPointsValue">30</span>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label>Initial Star Formation Rate:</label>
-                    <div class="control-row">
-                        <input type="range" id="emissionRateSlider" min="0.01" max="0.1" step="0.005" value="0.045">
-                        <span id="emissionRateValue">0.045</span>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label>Star Formation Rate Decay:</label>
-                    <div class="control-row">
-                        <input type="range" id="decayRateSlider" min="600" max="3600" step="300" value="1200">
-                        <span id="decayRateValue">1200</span>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label>Max Particles:</label>
-                    <div class="control-row">
-                        <input type="range" id="maxParticlesSlider" min="500" max="5000" step="250" value="2000">
-                        <span id="maxParticlesValue">2000</span>
-                    </div>
-                </div>
-                <div style="color: #ff6666; font-size: 11px; margin-top: 10px; text-align: center;">
-                    ⚠️ High particle counts are computationally expensive
-                </div>
+        </div>
+        
+        <div class="control-group">
+            <label>Centripetal Force:</label>
+            <div class="control-row">
+                <input type="range" id="centripetalSlider" min="1.0" max="15.0" step="0.5" value="6.0">
+                <span id="centripetalValue">6.0</span>
             </div>
-            
-            <div class="nav-links">
-                <a href="helix.html">← Back to Helix Simulation</a>
-                <a href="index.html">Galaxy Soup Home</a>
+        </div>
+        
+        <div class="control-group">
+            <label>Disk Gravity:</label>
+            <div class="control-row">
+                <input type="range" id="diskGravitySlider" min="0.0" max="2.0" step="0.01" value="0.03">
+                <span id="diskGravityValue">0.03</span>
             </div>
+        </div>
+        
+        <div class="control-group">
+            <label>Ball-to-Ball Gravity:</label>
+            <div class="control-row">
+                <input type="range" id="ballGravitySlider" min="0.0" max="0.005" step="0.0001" value="0.001">
+                <span id="ballGravityValue">0.001</span>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label>Viewing Angle Tilt:</label>
+            <div class="control-row">
+                <input type="range" id="viewTiltSlider" min="-30" max="30" step="2" value="0">
+                <span id="viewTiltValue">0°</span>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label>Bulge Radius:</label>
+            <div class="control-row">
+                <input type="range" id="bulgeRadiusSlider" min="10" max="120" step="5" value="60">
+                <span id="bulgeRadiusValue">60</span>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label>Bulge Height:</label>
+            <div class="control-row">
+                <input type="range" id="bulgeHeightSlider" min="5" max="40" step="2" value="15">
+                <span id="bulgeHeightValue">15</span>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label>Number of Star Formation Sites:</label>
+            <div class="control-row">
+                <input type="range" id="emissionPointsSlider" min="10" max="50" step="5" value="30">
+                <span id="emissionPointsValue">30</span>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label>Initial Star Formation Rate:</label>
+            <div class="control-row">
+                <input type="range" id="emissionRateSlider" min="0.01" max="0.1" step="0.005" value="0.045">
+                <span id="emissionRateValue">0.045</span>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label>Star Formation Rate Decay:</label>
+            <div class="control-row">
+                <input type="range" id="decayRateSlider" min="600" max="3600" step="300" value="1200">
+                <span id="decayRateValue">1200</span>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label>Maximum Stars:</label>
+            <div class="control-row">
+                <input type="range" id="maxParticlesSlider" min="500" max="3000" step="100" value="2000">
+                <span id="maxParticlesValue">2000</span>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <strong>Galaxy Physics Simulation</strong><br>
+            This simulation models star formation in a galactic bulge with realistic physics including gravity, orbital mechanics, and 3D particle dynamics. Adjust the parameters to explore different galactic configurations and observe how stars form and interact within the gravitational field.
         </div>
     </div>
     
