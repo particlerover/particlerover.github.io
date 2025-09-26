@@ -195,7 +195,7 @@ class GalacticDisk {
             
             // Create curved arm segments (galaxy spiral shape) - wider arms
             const numSegments = 20;
-            const maxRadius = 120;
+            const maxRadius = this.bulgeRadius * 2.0; // Arms extend 2x the bulge radius
             
             for (let i = 0; i < numSegments; i++) {
                 const t = i / (numSegments - 1); // 0 to 1
