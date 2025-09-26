@@ -156,7 +156,7 @@ class Ball {
 }
 
 class GalacticDisk {
-    constructor(x, y, numArms = 5, emissionPointsPerArm = 30, armWidthMultiplier = 1.0) {
+    constructor(x, y, numArms = 5, emissionPointsPerArm = 30, armWidthMultiplier = 1.0, bulgeRadius = 60, bulgeHeight = 15) {
         this.position = new Vector2(x, y);
         this.rotation = 0;
         this.rotationSpeed = 0.01; // Slow clockwise rotation
@@ -167,6 +167,8 @@ class GalacticDisk {
         this.numArms = numArms;
         this.emissionPointsPerArm = emissionPointsPerArm;
         this.armWidthMultiplier = armWidthMultiplier;
+        this.bulgeRadius = bulgeRadius;
+        this.bulgeHeight = bulgeHeight;
         this.arms = [];
         this.emissionPoints = [];
         
@@ -182,6 +184,7 @@ class GalacticDisk {
         
         const armAngleStep = (Math.PI * 2) / this.numArms;
         
+        // Generate arms for visual display (wider arms)
         for (let armIndex = 0; armIndex < this.numArms; armIndex++) {
             const baseAngle = armIndex * armAngleStep;
             const arm = {
@@ -190,7 +193,7 @@ class GalacticDisk {
                 emissionPoints: []
             };
             
-            // Create curved arm segments (galaxy spiral shape)
+            // Create curved arm segments (galaxy spiral shape) - wider arms
             const numSegments = 20;
             const maxRadius = 120;
             
@@ -205,43 +208,46 @@ class GalacticDisk {
                 const segment = {
                     x: Math.cos(segmentAngle) * radius,
                     y: Math.sin(segmentAngle) * radius,
-                    radius: (12 - t * 8) * this.armWidthMultiplier, // Dynamic arm width scaling
+                    radius: (12 - t * 8) * this.armWidthMultiplier, // Much wider arms possible
                     angle: segmentAngle,
                     distanceFromCenter: radius
                 };
                 
                 arm.segments.push(segment);
-                
-                // Add emission points along the arm based on dynamic parameter
-                if (i > 1 && i < numSegments - 1) { // Skip first and last segments
-                    for (let side = -1; side <= 1; side += 2) { // Both sides of disk
-                        // Dynamic number of emission points per arm
-                        const pointsForThisSegment = Math.ceil(this.emissionPointsPerArm / (numSegments - 2));
-                        for (let subPoint = 0; subPoint < pointsForThisSegment; subPoint++) {
-                            const offsetAngle = (subPoint - 0.5) * 0.3; // Slight angular offset
-                            const offsetRadius = segment.distanceFromCenter + (subPoint - 0.5) * 5;
-                            const offsetX = Math.cos(segment.angle + offsetAngle) * offsetRadius;
-                            const offsetY = Math.sin(segment.angle + offsetAngle) * offsetRadius;
-                            
-                            const emissionPoint = {
-                                armIndex: armIndex,
-                                segmentIndex: i,
-                                x: offsetX,
-                                y: offsetY,
-                                z: 0, // Start at disk plane
-                                side: side, // +1 for above disk, -1 for below
-                                isActive: false,
-                                activationTime: Math.random() * 40 + 40, // Start within 40-80 frames
-                                lastEmission: 0
-                            };
-                            
-                            this.emissionPoints.push(emissionPoint);
-                        }
-                    }
-                }
             }
             
             this.arms.push(arm);
+        }
+        
+        // Generate bulge emission points (particles only emit from bulge, not arms)
+        const totalBulgePoints = this.emissionPointsPerArm * this.numArms; // Same total count as before
+        const bulgeRadialLayers = 3; // Create layers within the bulge
+        
+        for (let layer = 0; layer < bulgeRadialLayers; layer++) {
+            const layerRadius = (layer + 1) * (this.bulgeRadius / bulgeRadialLayers);
+            const pointsInLayer = Math.ceil(totalBulgePoints / bulgeRadialLayers);
+            
+            for (let i = 0; i < pointsInLayer; i++) {
+                const angle = (i / pointsInLayer) * Math.PI * 2;
+                const radiusVariation = layerRadius + (Math.random() - 0.5) * layerRadius * 0.3;
+                
+                for (let side = -1; side <= 1; side += 2) { // Both sides of disk
+                    const emissionPoint = {
+                        armIndex: 0, // All from bulge (not specific to an arm)
+                        segmentIndex: layer,
+                        x: Math.cos(angle) * radiusVariation,
+                        y: Math.sin(angle) * radiusVariation,
+                        z: (Math.random() - 0.5) * this.bulgeHeight * 0.5, // Start within bulge height
+                        side: side, // +1 for above disk, -1 for below
+                        isActive: false,
+                        activationTime: Math.random() * 40 + 20, // Faster activation for bulge
+                        lastEmission: 0,
+                        bulgePoint: true // Mark as bulge emission point
+                    };
+                    
+                    this.emissionPoints.push(emissionPoint);
+                }
+            }
         }
     }
     
@@ -420,16 +426,43 @@ class GalacticDisk {
             }
         }
         
-        // Draw active emission points as small dots along the disk edge
+        // Draw galactic bulge (visible bulge structure)
+        const bulgeWidth = this.bulgeRadius * 2;
+        const bulgeHeightVisible = this.bulgeHeight * Math.abs(Math.cos(tiltRadians)); // Height affected by tilt
+        
+        // Bulge outer glow
+        ctx.globalAlpha = 0.3;
+        ctx.fillStyle = '#ffaa44';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, bulgeWidth * 1.2, bulgeHeightVisible * 1.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Main bulge
+        ctx.globalAlpha = 0.6;
+        ctx.fillStyle = '#ffcc66';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, bulgeWidth, bulgeHeightVisible, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Inner bulge core
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = '#ffdd88';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, bulgeWidth * 0.6, bulgeHeightVisible * 0.7, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Draw active emission points as small dots in the bulge
         if (this.isActive) {
             ctx.globalAlpha = 0.8;
             for (let point of this.emissionPoints) {
-                if (point.isActive) {
+                if (point.isActive && point.bulgePoint) {
                     const rotatedX = point.x * Math.cos(this.rotation) - point.y * Math.sin(this.rotation);
+                    const rotatedY = point.x * Math.sin(this.rotation) + point.y * Math.cos(this.rotation);
+                    const tiltedY = rotatedY * Math.cos(tiltRadians) - point.z * Math.sin(tiltRadians);
                     
-                    ctx.fillStyle = point.side > 0 ? '#ff6666' : '#66ff66';
+                    ctx.fillStyle = point.side > 0 ? '#ff8888' : '#88ff88';
                     ctx.beginPath();
-                    ctx.arc(rotatedX, point.side * 2, 2, 0, Math.PI * 2);
+                    ctx.arc(rotatedX, tiltedY, 1.5, 0, Math.PI * 2);
                     ctx.fill();
                 }
             }
@@ -484,8 +517,10 @@ class GalaxySimulation {
         this.maxBalls = 2000; // Higher limit for more complex interactions
         this.viewTilt = 0; // Viewing angle tilt in degrees
         this.armWidthMultiplier = 1.0; // Arm width scaling factor
+        this.bulgeRadius = 60; // Radius of galactic bulge
+        this.bulgeHeight = 15; // Height of galactic bulge above/below disk
         
-        this.galaxy = new GalacticDisk(0, 0, this.numArms, this.emissionPointsPerArm, this.armWidthMultiplier);
+        this.galaxy = new GalacticDisk(0, 0, this.numArms, this.emissionPointsPerArm, this.armWidthMultiplier, this.bulgeRadius, this.bulgeHeight);
         this.balls = [];
         this.isRunning = false;
         this.isPaused = false;
@@ -576,6 +611,22 @@ class GalaxySimulation {
             this.maxBalls = parseInt(e.target.value);
             document.getElementById('maxParticlesValue').textContent = this.maxBalls.toString();
         });
+        
+        // Bulge control sliders
+        const bulgeRadiusSlider = document.getElementById('bulgeRadiusSlider');
+        const bulgeHeightSlider = document.getElementById('bulgeHeightSlider');
+        
+        bulgeRadiusSlider.addEventListener('input', (e) => {
+            this.bulgeRadius = parseInt(e.target.value);
+            document.getElementById('bulgeRadiusValue').textContent = this.bulgeRadius.toString();
+            this.regenerateGalaxy();
+        });
+        
+        bulgeHeightSlider.addEventListener('input', (e) => {
+            this.bulgeHeight = parseInt(e.target.value);
+            document.getElementById('bulgeHeightValue').textContent = this.bulgeHeight.toString();
+            this.regenerateGalaxy();
+        });
     }
     
     start() {
@@ -604,7 +655,7 @@ class GalaxySimulation {
         this.isRunning = false;
         this.isPaused = false;
         this.balls = [];
-        this.galaxy = new GalacticDisk(0, 0, this.numArms, this.emissionPointsPerArm, this.armWidthMultiplier);
+        this.galaxy = new GalacticDisk(0, 0, this.numArms, this.emissionPointsPerArm, this.armWidthMultiplier, this.bulgeRadius, this.bulgeHeight);
         this.frameCount = 0;
         document.getElementById('startBtn').disabled = false;
         document.getElementById('pauseBtn').disabled = true;
