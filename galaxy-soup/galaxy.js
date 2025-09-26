@@ -201,8 +201,8 @@ class GalacticDisk {
                 const t = i / (numSegments - 1); // 0 to 1
                 const radius = this.centerRadius + t * maxRadius;
                 
-                // Spiral curve - arms curve backward from rotation direction
-                const spiralOffset = -t * 1.2; // Negative for trailing arms
+                // Spiral curve - arms curve backward from rotation direction with longer arc
+                const spiralOffset = -t * 2.5; // Increased from 1.2 to 2.5 for longer spiral arc
                 const segmentAngle = baseAngle + spiralOffset;
                 
                 const segment = {
@@ -369,24 +369,7 @@ class GalacticDisk {
         
         const tiltRadians = viewTilt * Math.PI / 180;
         
-        // Draw central core as thin ellipse (edge-on view, affected by tilt)
-        const pulseScale = 1 + Math.sin(this.pulsePhase) * 0.15;
-        const coreWidth = this.centerRadius * pulseScale;
-        const coreHeight = 4 * Math.abs(Math.cos(tiltRadians)); // Height changes with tilt
-        
-        // Core glow
-        ctx.globalAlpha = 0.6;
-        ctx.fillStyle = '#ffaa44';
-        ctx.beginPath();
-        ctx.ellipse(0, 0, coreWidth * 1.5, coreHeight * 2, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Core
-        ctx.globalAlpha = 1.0;
-        ctx.fillStyle = '#ffcc66';
-        ctx.beginPath();
-        ctx.ellipse(0, 0, coreWidth, coreHeight, 0, 0, Math.PI * 2);
-        ctx.fill();
+        // No central core disk rendering - gravity comes from particle interactions
         
         // Draw arms as thin lines (edge-on view)
         for (let arm of this.arms) {
@@ -417,7 +400,7 @@ class GalacticDisk {
                 
                 // Calculate thickness factor based on distance from center
                 const centerDistance = segment.distanceFromCenter;
-                const maxDistance = 120; // Same as maxRadius in arm generation
+                const maxDistance = this.bulgeRadius * 2.0; // Same as maxRadius in arm generation
                 const distanceFactor = 1.0 - (centerDistance / maxDistance); // 1.0 at center, 0.0 at edge
                 const zThickness = (1.0 + distanceFactor * 3.0) * Math.abs(Math.cos(tiltRadians)); // Apply tilt to thickness
                 
