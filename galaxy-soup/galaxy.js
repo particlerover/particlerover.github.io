@@ -156,7 +156,7 @@ class Ball {
 }
 
 class GalacticDisk {
-    constructor(x, y, numArms = 5, emissionPointsPerArm = 30, armWidthMultiplier = 1.0, bulgeRadius = 60, bulgeHeight = 15) {
+    constructor(x, y, numArms = 2, emissionPointsPerArm = 30, armWidthMultiplier = 1.0, bulgeRadius = 60, bulgeHeight = 15) {
         this.position = new Vector2(x, y);
         this.rotation = 0;
         this.rotationSpeed = 0.01; // Slow clockwise rotation
@@ -164,7 +164,7 @@ class GalacticDisk {
         this.centerRadius = 15;
         
         // Dynamic arms configuration
-        this.numArms = numArms;
+        this.numArms = 2; // Fixed to 2 arms
         this.emissionPointsPerArm = emissionPointsPerArm;
         this.armWidthMultiplier = armWidthMultiplier;
         this.bulgeRadius = bulgeRadius;
@@ -319,9 +319,6 @@ class GalacticDisk {
                 // Dynamic ejection velocity
                 const escapeSpeed = baseVelocity + Math.random() * 3.0; // Base velocity from slider + random variation
                 
-                // Start with vertical ejection (straight up/down from disk plane)
-                const verticalDirection = Math.random() < 0.5 ? 1 : -1; // Up or down
-                
                 // Calculate centripetal effect based on distance from center and rotation speed
                 const distanceFromCenter = Math.sqrt(rotatedX * rotatedX + rotatedY * rotatedY);
                 const rotationalSpeed = this.rotationSpeed * distanceFromCenter; // Tangential velocity
@@ -330,25 +327,32 @@ class GalacticDisk {
                 const radialAngle = Math.atan2(rotatedY, rotatedX);
                 const centripitalDeflection = rotationalSpeed * centripetalForce; // Dynamic centripetal force from slider
                 
-                // Base vertical velocity with centripetal deflection
+                // Base radial velocity with centripetal deflection
                 const baseVx = Math.cos(radialAngle) * centripitalDeflection;
                 const baseVy = Math.sin(radialAngle) * centripitalDeflection;
-                const baseVz = escapeSpeed * verticalDirection;
                 
-                // Emit just a pair of balls - one up, one down
-                for (let direction = -1; direction <= 1; direction += 2) { // -1 for down, +1 for up
+                // Emit just a pair of balls in randomized directions
+                for (let i = 0; i < 2; i++) {
                     const ball = new Ball(rotatedX, rotatedY, point.z);
                     ball.armId = point.armIndex;
                     
-                    // Set velocity for this direction
-                    ball.velocity = new Vector2(baseVx, baseVy);
-                    ball.zVelocity = baseVz * direction; // Direction determines up/down
+                    // Randomized direction in 3D space
+                    const randomAngle = Math.random() * Math.PI * 2; // Random horizontal angle
+                    const randomElevation = (Math.random() - 0.5) * Math.PI; // Random vertical angle (-π/2 to π/2)
                     
-                    // Color based on arm and direction
-                    const armHue = (point.armIndex * 72) % 360; // Distribute hues across arms
-                    const directionHue = direction > 0 ? 20 : -20; // Different colors for up/down
-                    const brightness = direction > 0 ? 70 : 60; // Brighter for upward
-                    ball.color = `hsl(${armHue + 180 + directionHue}, 70%, ${brightness}%)`; 
+                    // Convert spherical to cartesian coordinates
+                    const randomVx = escapeSpeed * Math.cos(randomElevation) * Math.cos(randomAngle);
+                    const randomVy = escapeSpeed * Math.cos(randomElevation) * Math.sin(randomAngle);
+                    const randomVz = escapeSpeed * Math.sin(randomElevation);
+                    
+                    // Combine random direction with centripetal effect
+                    ball.velocity = new Vector2(baseVx + randomVx * 0.5, baseVy + randomVy * 0.5);
+                    ball.zVelocity = randomVz;
+                    
+                    // Color based on direction - use the elevation angle for hue variation
+                    const elevationHue = ((randomElevation + Math.PI/2) / Math.PI) * 60 + 200; // Blue to cyan range
+                    const brightness = 60 + Math.abs(randomVz) * 20; // Brighter for faster Z movement
+                    ball.color = `hsl(${elevationHue}, 70%, ${Math.min(brightness, 80)}%)`; 
                     
                     newBalls.push(ball);
                 }
@@ -510,7 +514,7 @@ class GalaxySimulation {
         this.centripetalForce = 6.0;
         this.diskGravity = 18.0;
         this.ballGravity = 7.0;
-        this.numArms = 5;
+        this.numArms = 2; // Fixed to 2 arms
         this.emissionPointsPerArm = 30;
         this.initialEmissionRate = 0.045;
         this.emissionDecayRate = 1200;
@@ -544,8 +548,6 @@ class GalaxySimulation {
         const diskGravitySlider = document.getElementById('diskGravitySlider');
         const ballGravitySlider = document.getElementById('ballGravitySlider');
         const viewTiltSlider = document.getElementById('viewTiltSlider');
-        const armsSlider = document.getElementById('armsSlider');
-        const armWidthSlider = document.getElementById('armWidthSlider');
         const emissionPointsSlider = document.getElementById('emissionPointsSlider');
         const emissionRateSlider = document.getElementById('emissionRateSlider');
         const decayRateSlider = document.getElementById('decayRateSlider');
@@ -576,20 +578,6 @@ class GalaxySimulation {
         viewTiltSlider.addEventListener('input', (e) => {
             this.viewTilt = parseInt(e.target.value);
             document.getElementById('viewTiltValue').textContent = this.viewTilt + '°';
-        });
-        
-        armsSlider.addEventListener('input', (e) => {
-            this.numArms = parseInt(e.target.value);
-            document.getElementById('armsValue').textContent = this.numArms.toString();
-            // Regenerate galaxy when arms change
-            this.regenerateGalaxy();
-        });
-        
-        armWidthSlider.addEventListener('input', (e) => {
-            this.armWidthMultiplier = parseFloat(e.target.value);
-            document.getElementById('armWidthValue').textContent = this.armWidthMultiplier.toFixed(1);
-            // Regenerate galaxy when arm width changes
-            this.regenerateGalaxy();
         });
         
         emissionPointsSlider.addEventListener('input', (e) => {

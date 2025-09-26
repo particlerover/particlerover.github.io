@@ -3,7 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galactic Disk Simulation - Spinning Arms</title>
+    <title>Galactic Disk Simulation - S                <div class="control-group">
+                    <label>Disk Gravity:</label>
+                    <div class="control-row">
+                        <input type="range" id="diskGravitySlider" min="0.0" max="2.0" step="0.01" value="0.03">
+                        <span id="diskGravityValue">0.03</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Ball-to-Ball Gravity:</label>
+                    <div class="control-row">
+                        <input type="range" id="ballGravitySlider" min="0.0" max="0.005" step="0.0001" value="0.001">
+                        <span id="ballGravityValue">0.001</span>
+                    </div>
+                </div>title>
     <style>
         body {
             margin: 0;
@@ -201,23 +214,9 @@
                     </div>
                 </div>
                 <div class="control-group">
-                    <label>Number of Arms:</label>
-                    <div class="control-row">
-                        <input type="range" id="armsSlider" min="2" max="8" step="1" value="5">
-                        <span id="armsValue">5</span>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label>Arm Width:</label>
-                    <div class="control-row">
-                        <input type="range" id="armWidthSlider" min="0.5" max="8.0" step="0.1" value="1.0">
-                        <span id="armWidthValue">1.0</span>
-                    </div>
-                </div>
-                <div class="control-group">
                     <label>Bulge Radius:</label>
                     <div class="control-row">
-                        <input type="range" id="bulgeRadiusSlider" min="20" max="120" step="5" value="60">
+                        <input type="range" id="bulgeRadiusSlider" min="10" max="120" step="5" value="60">
                         <span id="bulgeRadiusValue">60</span>
                     </div>
                 </div>
@@ -229,21 +228,21 @@
                     </div>
                 </div>
                 <div class="control-group">
-                    <label>Emission Points per Arm:</label>
+                    <label>Number of Star Formation Sites:</label>
                     <div class="control-row">
                         <input type="range" id="emissionPointsSlider" min="10" max="50" step="5" value="30">
                         <span id="emissionPointsValue">30</span>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label>Initial Emission Rate:</label>
+                    <label>Initial Star Formation Rate:</label>
                     <div class="control-row">
                         <input type="range" id="emissionRateSlider" min="0.01" max="0.1" step="0.005" value="0.045">
                         <span id="emissionRateValue">0.045</span>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label>Emission Decay Rate:</label>
+                    <label>Star Formation Rate Decay:</label>
                     <div class="control-row">
                         <input type="range" id="decayRateSlider" min="600" max="3600" step="300" value="1200">
                         <span id="decayRateValue">1200</span>
