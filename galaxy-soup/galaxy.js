@@ -156,7 +156,7 @@ class Ball {
 }
 
 class GalacticDisk {
-    constructor(x, y, numArms = 2, emissionPointsPerArm = 30, armWidthMultiplier = 1.0, bulgeRadius = 60, bulgeHeight = 15) {
+    constructor(x, y, numArms = 2, emissionPointsPerArm = 30, armWidthMultiplier = 1.0, armHeightMultiplier = 1.0, bulgeRadius = 60, bulgeHeight = 15) {
         this.position = new Vector2(x, y);
         this.rotation = 0;
         this.rotationSpeed = 0.01; // Slow clockwise rotation
@@ -167,6 +167,7 @@ class GalacticDisk {
         this.numArms = 2; // Fixed to 2 arms
         this.emissionPointsPerArm = emissionPointsPerArm;
         this.armWidthMultiplier = armWidthMultiplier;
+        this.armHeightMultiplier = armHeightMultiplier;
         this.bulgeRadius = bulgeRadius;
         this.bulgeHeight = bulgeHeight;
         this.arms = [];
@@ -402,7 +403,7 @@ class GalacticDisk {
                 const centerDistance = segment.distanceFromCenter;
                 const maxDistance = this.bulgeRadius * 2.0; // Same as maxRadius in arm generation
                 const distanceFactor = 1.0 - (centerDistance / maxDistance); // 1.0 at center, 0.0 at edge
-                const zThickness = (1.0 + distanceFactor * 3.0) * Math.abs(Math.cos(tiltRadians)); // Apply tilt to thickness
+                const zThickness = (1.0 + distanceFactor * 3.0) * Math.abs(Math.cos(tiltRadians)) * this.armHeightMultiplier; // Apply tilt and height multiplier
                 
                 ctx.strokeStyle = '#3355aa';
                 ctx.lineWidth = Math.max(1, segment.radius * 0.3);
@@ -413,30 +414,7 @@ class GalacticDisk {
             }
         }
         
-        // Draw galactic bulge (visible bulge structure)
-        const bulgeWidth = this.bulgeRadius * 2;
-        const bulgeHeightVisible = this.bulgeHeight * Math.abs(Math.cos(tiltRadians)); // Height affected by tilt
-        
-        // Bulge outer glow
-        ctx.globalAlpha = 0.3;
-        ctx.fillStyle = '#ffaa44';
-        ctx.beginPath();
-        ctx.ellipse(0, 0, bulgeWidth * 1.2, bulgeHeightVisible * 1.5, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Main bulge
-        ctx.globalAlpha = 0.6;
-        ctx.fillStyle = '#ffcc66';
-        ctx.beginPath();
-        ctx.ellipse(0, 0, bulgeWidth, bulgeHeightVisible, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Inner bulge core
-        ctx.globalAlpha = 0.8;
-        ctx.fillStyle = '#ffdd88';
-        ctx.beginPath();
-        ctx.ellipse(0, 0, bulgeWidth * 0.6, bulgeHeightVisible * 0.7, 0, 0, Math.PI * 2);
-        ctx.fill();
+        // No bulge ellipse rendering - just show emission points and particles
         
         // Draw active emission points as small dots in the bulge
         if (this.isActive) {
@@ -504,10 +482,11 @@ class GalaxySimulation {
         this.maxBalls = 2000; // Higher limit for more complex interactions
         this.viewTilt = 0; // Viewing angle tilt in degrees
         this.armWidthMultiplier = 1.0; // Arm width scaling factor
+        this.armHeightMultiplier = 1.0; // Arm height scaling factor
         this.bulgeRadius = 60; // Radius of galactic bulge
         this.bulgeHeight = 15; // Height of galactic bulge above/below disk
         
-        this.galaxy = new GalacticDisk(0, 0, this.numArms, this.emissionPointsPerArm, this.armWidthMultiplier, this.bulgeRadius, this.bulgeHeight);
+        this.galaxy = new GalacticDisk(0, 0, this.numArms, this.emissionPointsPerArm, this.armWidthMultiplier, this.armHeightMultiplier, this.bulgeRadius, this.bulgeHeight);
         this.balls = [];
         this.isRunning = false;
         this.isPaused = false;
@@ -537,6 +516,8 @@ class GalaxySimulation {
         const maxParticlesSlider = document.getElementById('maxParticlesSlider');
         const bulgeRadiusSlider = document.getElementById('bulgeRadiusSlider');
         const bulgeHeightSlider = document.getElementById('bulgeHeightSlider');
+        const armWidthSlider = document.getElementById('armWidthSlider');
+        const armHeightSlider = document.getElementById('armHeightSlider');
         
         velocitySlider.addEventListener('input', (e) => {
             this.baseVelocity = parseFloat(e.target.value);
@@ -597,6 +578,18 @@ class GalaxySimulation {
             document.getElementById('bulgeHeightValue').textContent = this.bulgeHeight.toString();
             this.regenerateGalaxy();
         });
+        
+        armWidthSlider.addEventListener('input', (e) => {
+            this.armWidthMultiplier = parseFloat(e.target.value);
+            document.getElementById('armWidthValue').textContent = this.armWidthMultiplier.toFixed(1);
+            this.regenerateGalaxy();
+        });
+        
+        armHeightSlider.addEventListener('input', (e) => {
+            this.armHeightMultiplier = parseFloat(e.target.value);
+            document.getElementById('armHeightValue').textContent = this.armHeightMultiplier.toFixed(1);
+            this.regenerateGalaxy();
+        });
     }
     
     start() {
@@ -625,7 +618,7 @@ class GalaxySimulation {
         this.isRunning = false;
         this.isPaused = false;
         this.balls = [];
-        this.galaxy = new GalacticDisk(0, 0, this.numArms, this.emissionPointsPerArm, this.armWidthMultiplier, this.bulgeRadius, this.bulgeHeight);
+        this.galaxy = new GalacticDisk(0, 0, this.numArms, this.emissionPointsPerArm, this.armWidthMultiplier, this.armHeightMultiplier, this.bulgeRadius, this.bulgeHeight);
         this.frameCount = 0;
         document.getElementById('startBtn').disabled = false;
         document.getElementById('pauseBtn').disabled = true;
