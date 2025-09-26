@@ -1,0 +1,435 @@
+---
+layout: default
+title: Private Booking Calendar - Friends & Family
+---
+
+<div class="calendar-container">
+    <div class="calendar-header">
+        <h1>Friends & Family Visit Calendar</h1>
+        <p>Plan your visits and coordinate with others!</p>
+        
+        <div class="calendar-controls">
+            <button id="prevMonth" class="nav-btn">&lt; Previous</button>
+            <span id="currentMonthYear"></span>
+            <button id="nextMonth" class="nav-btn">Next &gt;</button>
+        </div>
+        
+        <button id="addBookingBtn" class="add-booking-btn">Add New Visit</button>
+    </div>
+
+    <div class="calendar-grid" id="calendarGrid">
+        <!-- Calendar will be dynamically generated here -->
+    </div>
+
+    <div class="legend">
+        <h3>Legend</h3>
+        <div class="legend-item">
+            <div class="legend-color available"></div>
+            <span>Available</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color booked"></div>
+            <span>Booked</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color selecting"></div>
+            <span>Selecting</span>
+        </div>
+    </div>
+
+    <div class="bookings-list">
+        <h3>Current Bookings</h3>
+        <div id="bookingsList">
+            <!-- Bookings will be listed here -->
+        </div>
+    </div>
+</div>
+
+<!-- Booking Modal -->
+<div id="bookingModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalTitle">Add New Visit</h2>
+        
+        <form id="bookingForm">
+            <div class="form-group">
+                <label for="visitorName">Who will be visiting?</label>
+                <input type="text" id="visitorName" name="visitorName" required 
+                       placeholder="e.g., John & Sarah">
+            </div>
+            
+            <div class="form-group">
+                <label for="petInfo">Any pets coming along?</label>
+                <input type="text" id="petInfo" name="petInfo" 
+                       placeholder="e.g., Max (golden retriever), optional">
+            </div>
+            
+            <div class="form-group">
+                <label for="startDate">Start Date:</label>
+                <input type="date" id="startDate" name="startDate" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="endDate">End Date:</label>
+                <input type="date" id="endDate" name="endDate" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="notes">Additional Notes:</label>
+                <textarea id="notes" name="notes" rows="3" 
+                          placeholder="Any special requests or notes..."></textarea>
+            </div>
+            
+            <div class="form-buttons">
+                <button type="submit" class="submit-btn">Save Booking</button>
+                <button type="button" id="deleteBookingBtn" class="delete-btn" style="display:none;">Delete Booking</button>
+                <button type="button" class="cancel-btn">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="modal">
+    <div class="modal-content">
+        <h3>Confirm Action</h3>
+        <p id="confirmMessage"></p>
+        <div class="form-buttons">
+            <button id="confirmYes" class="submit-btn">Yes</button>
+            <button id="confirmNo" class="cancel-btn">No</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script src="/private/calendar/auth.js"></script>
+<script src="/private/calendar/calendar.js"></script>
+
+<style>
+.calendar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.calendar-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.calendar-controls {
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.nav-btn {
+    background: #007cba;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.nav-btn:hover {
+    background: #005a87;
+}
+
+.add-booking-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 15px;
+}
+
+.add-booking-btn:hover {
+    background: #218838;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 30px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.calendar-day {
+    min-height: 80px;
+    padding: 8px;
+    border: 1px solid #eee;
+    background: white;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+}
+
+.calendar-day:hover {
+    background: #f0f8ff;
+}
+
+.calendar-day.other-month {
+    background: #f8f9fa;
+    color: #6c757d;
+}
+
+.calendar-day.today {
+    background: #fff3cd;
+    font-weight: bold;
+}
+
+.calendar-day.booked {
+    background: #ffebee;
+    border-left: 4px solid #e74c3c;
+}
+
+.calendar-day.selecting {
+    background: #e3f2fd;
+    border: 2px solid #2196f3;
+}
+
+.calendar-day.selected {
+    background: #bbdefb;
+}
+
+.day-number {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.booking-info {
+    font-size: 11px;
+    color: #666;
+    margin-top: 2px;
+    word-wrap: break-word;
+}
+
+.calendar-header-day {
+    background: #f8f9fa;
+    font-weight: bold;
+    text-align: center;
+    padding: 12px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.legend {
+    margin: 20px 0;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 20px;
+    margin-bottom: 10px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    margin-right: 8px;
+    border: 1px solid #ddd;
+}
+
+.legend-color.available {
+    background: white;
+}
+
+.legend-color.booked {
+    background: #ffebee;
+    border-left: 4px solid #e74c3c;
+}
+
+.legend-color.selecting {
+    background: #e3f2fd;
+    border: 2px solid #2196f3;
+}
+
+.bookings-list {
+    margin-top: 30px;
+}
+
+.booking-item {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.booking-item:hover {
+    background: #e9ecef;
+}
+
+.booking-visitor {
+    font-weight: bold;
+    font-size: 16px;
+    color: #007cba;
+}
+
+.booking-dates {
+    color: #666;
+    margin: 5px 0;
+}
+
+.booking-pets {
+    color: #28a745;
+    font-style: italic;
+}
+
+.booking-notes {
+    color: #666;
+    margin-top: 8px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+}
+
+.close:hover {
+    color: black;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #007cba;
+    box-shadow: 0 0 5px rgba(0,124,186,0.3);
+}
+
+.form-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 25px;
+}
+
+.submit-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.submit-btn:hover {
+    background: #218838;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    background: #c82333;
+}
+
+.cancel-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.cancel-btn:hover {
+    background: #5a6268;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .calendar-container {
+        padding: 10px;
+    }
+    
+    .calendar-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .calendar-day {
+        min-height: 60px;
+        font-size: 12px;
+    }
+    
+    .modal-content {
+        margin: 10% auto;
+        padding: 20px;
+        width: 95%;
+    }
+    
+    .form-buttons {
+        flex-direction: column;
+    }
+}
+</style>

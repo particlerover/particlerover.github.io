@@ -1,9 +1,8 @@
-// Simple password protection for the private calendar
-class CalendarAuth {
+// Simple password protection for the private file sharing
+class FilesAuth {
     constructor() {
         this.isAuthenticated = false;
-        this.sessionKey = 'calendarAuth';
-        this.passwordHash = 'YOUR_PASSWORD_HASH'; // You'll need to set this
+        this.sessionKey = 'filesAuth';
         
         this.checkAuth();
     }
@@ -21,8 +20,8 @@ class CalendarAuth {
     }
 
     showPasswordPrompt() {
-        // Hide the main calendar content
-        document.querySelector('.calendar-container').style.display = 'none';
+        // Hide the main files content
+        document.querySelector('.files-container').style.display = 'none';
         
         // Create password prompt overlay
         const overlay = document.createElement('div');
@@ -30,19 +29,23 @@ class CalendarAuth {
         overlay.innerHTML = `
             <div class="auth-container">
                 <div class="auth-content">
-                    <h2>🔒 Private Calendar Access</h2>
-                    <p>This calendar is for friends and family only.</p>
+                    <h2>📁 File Sharing Access</h2>
+                    <p>Welcome to our private file sharing area!</p>
                     <p>Please enter the access code:</p>
                     
                     <form id="authForm">
                         <div class="auth-group">
                             <input type="password" id="authPassword" placeholder="Enter access code" required>
                         </div>
-                        <button type="submit" class="auth-btn">Access Calendar</button>
+                        <button type="submit" class="auth-btn">Access Files</button>
                     </form>
                     
                     <div id="authError" class="auth-error" style="display: none;">
                         Incorrect access code. Please try again.
+                    </div>
+                    
+                    <div class="auth-back">
+                        <a href="/private/">&larr; Back to Private Area</a>
                     </div>
                 </div>
             </div>
@@ -64,7 +67,7 @@ class CalendarAuth {
         const password = document.getElementById('authPassword').value;
         const errorDiv = document.getElementById('authError');
         
-        // Simple password check - you should set your own password
+        // Simple password check
         if (this.checkPassword(password)) {
             // Authentication successful
             this.isAuthenticated = true;
@@ -73,13 +76,8 @@ class CalendarAuth {
             // Remove auth overlay
             document.getElementById('authOverlay').remove();
             
-            // Show calendar content
-            document.querySelector('.calendar-container').style.display = 'block';
-            
-            // Initialize the calendar
-            if (typeof initializeCalendar === 'function') {
-                initializeCalendar();
-            }
+            // Show files content
+            document.querySelector('.files-container').style.display = 'block';
         } else {
             // Authentication failed
             errorDiv.style.display = 'block';
@@ -94,30 +92,17 @@ class CalendarAuth {
     }
 
     checkPassword(password) {
-        // For security, you should hash your password
-        // For now, using simple comparison - CHANGE THIS!
-        const correctPassword = 'friendsandfamily2024'; // CHANGE THIS TO YOUR CHOSEN PASSWORD
+        // File sharing access password
+        const correctPassword = 'sharingiscaring'; // This is the password for file sharing
         
         // You can also use multiple passwords for different people
         const validPasswords = [
-            'friendsandfamily2024',  // CHANGE THESE
-            'carriesguests',         // CHANGE THESE  
-            'visitcarrie'            // CHANGE THESE
+            'sharingiscaring',  // Main file sharing password
+            'sharefiles',       // Alternative password
+            'filesforall'       // Another alternative
         ];
         
         return validPasswords.includes(password.toLowerCase());
-    }
-
-    // Method to generate password hash (call this once to get your hash)
-    generatePasswordHash(password) {
-        // Simple hash function - in production, use a proper hashing library
-        let hash = 0;
-        for (let i = 0; i < password.length; i++) {
-            const char = password.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Convert to 32-bit integer
-        }
-        return hash.toString();
     }
 
     // Logout method
@@ -129,19 +114,14 @@ class CalendarAuth {
 
 // Initialize authentication when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.calendarAuth = new CalendarAuth();
-    
-    // Only initialize calendar if authenticated
-    if (window.calendarAuth.isAuthenticated && typeof initializeCalendar === 'function') {
-        initializeCalendar();
-    }
+    window.filesAuth = new FilesAuth();
     
     // Add logout functionality (hidden, accessible via console)
     window.addEventListener('keydown', (e) => {
         // Press Ctrl+Shift+L to logout (hidden feature)
         if (e.ctrlKey && e.shiftKey && e.key === 'L') {
-            if (confirm('Logout from calendar?')) {
-                window.calendarAuth.logout();
+            if (confirm('Logout from file sharing?')) {
+                window.filesAuth.logout();
             }
         }
     });
@@ -156,7 +136,7 @@ const authStyles = `
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
     z-index: 10000;
     display: flex;
     align-items: center;
@@ -202,12 +182,12 @@ const authStyles = `
 
 .auth-group input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #6f42c1;
+    box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
 }
 
 .auth-btn {
-    background: #667eea;
+    background: #6f42c1;
     color: white;
     border: none;
     padding: 15px 30px;
@@ -219,7 +199,7 @@ const authStyles = `
 }
 
 .auth-btn:hover {
-    background: #5a67d8;
+    background: #5a32a3;
 }
 
 .auth-error {
@@ -229,6 +209,22 @@ const authStyles = `
     border-radius: 5px;
     margin-top: 15px;
     font-size: 14px;
+}
+
+.auth-back {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.auth-back a {
+    color: #6f42c1;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.auth-back a:hover {
+    text-decoration: underline;
 }
 
 @media (max-width: 480px) {

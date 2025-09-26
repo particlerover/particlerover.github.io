@@ -1,0 +1,167 @@
+---
+layout: default
+title: Private File Sharing - Friends & Family
+---
+
+<div class="files-container">
+    <div class="files-header">
+        <h1>📁 Private File Sharing</h1>
+        <p>A secure space to share photos, documents, and other files with friends and family.</p>
+    </div>
+
+    <div class="files-content">
+        <div class="coming-soon">
+            <div class="construction-icon">🚧</div>
+            <h2>Coming Soon!</h2>
+            <p>This file sharing area is currently being set up. Check back soon for:</p>
+            
+            <ul class="features-list">
+                <li>📸 Photo albums from gatherings</li>
+                <li>📄 Documents and forms</li>
+                <li>🎵 Music playlists</li>
+                <li>📹 Videos and memories</li>
+                <li>📝 Shared documents</li>
+            </ul>
+            
+            <p><em>In the meantime, feel free to email Carrie directly if you need to share something!</em></p>
+        </div>
+        
+        <div class="placeholder-actions">
+            <a href="/private/" class="back-btn">← Back to Private Area</a>
+        </div>
+    </div>
+</div>
+
+<script src="/private/files/auth.js"></script>
+
+<style>
+.files-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.files-header {
+    margin-bottom: 50px;
+}
+
+.files-header h1 {
+    color: #333;
+    font-size: 2.5em;
+    margin-bottom: 15px;
+}
+
+.files-header p {
+    color: #666;
+    font-size: 1.2em;
+    margin-bottom: 0;
+}
+
+.files-content {
+    background: white;
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+}
+
+.coming-soon {
+    margin-bottom: 30px;
+}
+
+.construction-icon {
+    font-size: 4em;
+    margin-bottom: 20px;
+}
+
+.coming-soon h2 {
+    color: #333;
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+.coming-soon p {
+    color: #666;
+    font-size: 1.1em;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.features-list {
+    text-align: left;
+    max-width: 400px;
+    margin: 25px auto;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 4px solid #6f42c1;
+}
+
+.features-list li {
+    margin-bottom: 10px;
+    font-size: 1em;
+    color: #333;
+}
+
+.placeholder-actions {
+    padding-top: 30px;
+    border-top: 1px solid #e9ecef;
+}
+
+.back-btn {
+    display: inline-block;
+    background: #6f42c1;
+    color: white;
+    text-decoration: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    background: #5a32a3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(111, 66, 193, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .files-container {
+        padding: 15px;
+    }
+    
+    .files-header h1 {
+        font-size: 2em;
+    }
+    
+    .files-content {
+        padding: 30px 20px;
+    }
+    
+    .construction-icon {
+        font-size: 3em;
+    }
+    
+    .features-list {
+        margin: 20px 10px;
+        padding: 15px;
+    }
+}
+
+/* Add some nice background */
+body {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    min-height: 100vh;
+}
+
+.files-container {
+    background: rgba(255,255,255,0.9);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    margin-top: 20px;
+}
+</style>
